@@ -5,6 +5,8 @@ from flask_cors import CORS
 from decision_tree import QUESTIONS
 from assembler import build_assessment
 from gpai import GPAI
+from glossary import GLOSSARY
+
 
 app = Flask(__name__)
 CORS(app)
@@ -60,5 +62,15 @@ def answer():
         "final_assessment": build_assessment(outcome, gpai_state)
     })
 
+@app.route("/glossary", methods=["GET"])
+def get_full_glossary():
+    """
+    Returns the full EU AI Act glossary
+    """
+    return jsonify({
+        "source": "EU AI Act",
+        "count": len(GLOSSARY),
+        "terms": GLOSSARY
+    })
 if __name__ == "__main__":
     app.run()
