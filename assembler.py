@@ -53,24 +53,105 @@ def build_assessment(outcome, gpai=None):
     assessment = {
         "risk_category": base["risk_category"],
         "legal_basis": base["legal_basis"],
-        "obligations": base.get("obligations", [])
+        "applicable_obligations": [],
+        "required_controls": [],
+        "not_required": []
     }
 
-    annex = annex_iii_justification(outcome)
-    if annex:
-        assessment["annex_iii_justification"] = annex
+    # ─────────────────────────
+    # UNACCEPTABLE RISK
+    # ─────────────────────────
+    if outcome == "UNACCEPTABLE":
+        assessment["applicable_obligations"] = [
+            "System must not be placed on the market or put into service"
+        ]
+        assessment["required_controls"] = [
+            "Immediate discontinuation",
+            "Removal from market",
+            "Governance prohibition decision"
+        ]
+        assessment["not_required"] = [
+            "Conformity assessment",
+            "CE marking",
+            "EU AI database registration",
+            "Post-market monitoring"
+        ]
+        return assessment
 
-    assessment["conformity_assessment"] = conformity_route(outcome)
-    assessment["eu_database_registration"] = eu_database(outcome)
-
+    # ─────────────────────────
+    # HIGH-RISK AI
+    # ─────────────────────────
     if outcome.startswith("HIGH_RISK"):
-        assessment["post_market_monitoring"] = [
-            "Performance monitoring",
-            "Incident reporting",
-            "Change impact assessment"
+        assessment["applicable_obligations"] = [
+            "Risk management system",
+            "Data governance and bias mitigation",
+            "Technical documentation",
+            "Logging and traceability",
+            "Human oversight",
+            "Accuracy, robustness and cybersecurity",
+            "Post-market monitoring and incident reporting"
         ]
 
-    if gpai:
-        assessment["gpai_additional_obligations"] = gpai
+        assessment["required_controls"] = [
+            "Formal AI risk assessment",
+            "Bias and fairness testing",
+            "Human-in-the-loop approval",
+            "Override and fallback mechanisms",
+            "Audit logging",
+            "Change management procedures"
+        ]
 
-    return assessment
+        assessment["additional_requirements"] = [
+            "Conformity assessment required before placing on the market",
+            "Registration in the EU AI database (Article 51)",
+            "CE marking required"
+        ]
+
+        return assessment
+
+    # ─────────────────────────
+    # TRANSPARENCY OBLIGATIONS (ARTICLE 52)
+    # ─────────────────────────
+    if outcome.startswith("TRANSPARENCY"):
+        assessment["applicable_obligations"] = [
+            "Inform individuals that they are interacting with an AI system",
+            "Disclose AI-generated or manipulated content where applicable",
+            "Disclose use of emotion recognition or biometric categorisation"
+        ]
+
+        assessment["required_controls"] = [
+            "Clear user-facing AI disclosures",
+            "Content labelling or watermarking",
+            "User documentation explaining AI use"
+        ]
+
+        assessment["not_required"] = [
+            "Conformity assessment",
+            "CE marking",
+            "EU AI database registration",
+            "Post-market monitoring"
+        ]
+
+        return assessment
+
+    # ─────────────────────────
+    # MINIMAL RISK
+    # ─────────────────────────
+    if outcome == "MINIMAL":
+        assessment["applicable_obligations"] = [
+            "No mandatory obligations under the EU AI Act"
+        ]
+
+        assessment["required_controls"] = [
+            "Voluntary codes of conduct",
+            "Ethical AI best practices"
+        ]
+
+        assessment["not_required"] = [
+            "Conformity assessment",
+            "CE marking",
+            "EU AI database registration",
+            "Post-market monitoring"
+        ]
+
+        return assessment
